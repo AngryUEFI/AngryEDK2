@@ -11,3 +11,5 @@ DOCKER_COMMAND=docker
 
 DOCKER_ARGS=(-v "${EDK2_DIR}":"${EDK2_DIR}" -e EDK2_DOCKER_USER_HOME="${EDK2_DIR}")
 DOCKER_IMAGE=ghcr.io/tianocore/containers/ubuntu-22-dev
+
+OUTPUT_DIR="${EDK2_DIR}"/Build/AngryUEFI

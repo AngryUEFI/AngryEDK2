@@ -31,3 +31,7 @@ build
 # Emulator
 cp AngryConfigs/target-EmulatorPkg.txt Conf/target.txt
 build
+
+# Create output dir and populate with UEFI code and data
+mkdir -p "${OUTPUT_DIR}"
+cp Build/OvmfX64/DEBUG_GCC5/FV/OVMF_CODE.fd Build/OvmfX64/DEBUG_GCC5/FV/OVMF_VARS.fd "${OUTPUT_DIR}"/
