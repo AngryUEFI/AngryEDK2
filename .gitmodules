@@ -35,3 +35,6 @@
 [submodule "SecurityPkg/DeviceSecurity/SpdmLib/libspdm"]
 	path = SecurityPkg/DeviceSecurity/SpdmLib/libspdm
 	url = https://github.com/DMTF/libspdm.git
+[submodule "AngryUEFI"]
+	path = AngryUEFI
+	url = git@github.com:AngryUEFI/AngryUEFI.git
