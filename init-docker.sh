@@ -20,9 +20,11 @@ make -j$(nproc) -C BaseTools
 export EDK_TOOLS_PATH="${EDK2_DIR}"/BaseTools
 . edksetup.sh BaseTools
 
+# we instead now use hardcoded OVMF files
+# somehow building our own never produced a network interface
 # OVMF BIOS
-cp AngryConfigs/target-OVMF.txt Conf/target.txt
-build
+# cp AngryConfigs/target-OVMF.txt Conf/target.txt
+# build -D E1000_ENABLE -D FD_SIZE_IN_KB=4096
 
 # MdeModulePkg
 cp AngryConfigs/target-MdeModulePkg.txt Conf/target.txt
@@ -34,4 +36,5 @@ build
 
 # Create output dir and populate with UEFI code and data
 mkdir -p "${OUTPUT_DIR}"
-cp Build/OvmfX64/DEBUG_GCC5/FV/OVMF_CODE.fd Build/OvmfX64/DEBUG_GCC5/FV/OVMF_VARS.fd "${OUTPUT_DIR}"/
+# cp Build/OvmfX64/DEBUG_GCC5/FV/OVMF_CODE.fd Build/OvmfX64/DEBUG_GCC5/FV/OVMF_VARS.fd "${OUTPUT_DIR}"/
+cp AngryConfigs/*.fd "${OUTPUT_DIR}"/
