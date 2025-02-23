@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -ex
+
 # High level overview
 #
 # 1. pull docker container
