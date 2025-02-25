@@ -12,8 +12,7 @@ set -ex
 EDK2_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 
 source "${EDK2_DIR}"/angry-vars.sh
-
-$DOCKER_COMMAND run "${DOCKER_ARGS[@]}" --rm -it "${DOCKER_IMAGE}" "${EDK2_DIR}"/build-docker.sh
+$DOCKER_COMMAND run "${DOCKER_ARGS[@]}" --rm -it "${DOCKER_IMAGE}" "${EDK2_DIR}"/build-docker.sh "$@"
 
 cp "${EDK2_DIR}"/Build/EmulatorX64/DEBUG_GCC5/X64/AngryUEFI.efi "${OUTPUT_DIR}"
 
