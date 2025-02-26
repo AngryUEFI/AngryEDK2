@@ -18,4 +18,5 @@ qemu-system-x86_64 \
   -device usb-storage,bus=xhci.0,drive=stick \
   -netdev user,id=net0,hostfwd=tcp::3239-:3239 \
   -device e1000,netdev=net0 \
-  -d guest_errors -serial stdio
+  -d guest_errors -serial stdio \
+  $@
