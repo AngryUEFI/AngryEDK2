@@ -33,7 +33,7 @@ LOOP=$(sudo losetup --show -fP $OUTPUT_IMAGE_USB)
 # format the first partition
 
 sudo mkfs.vfat -F32 ${LOOP}p1
-sudo fatlabel ${LOOP}p1 ESP
+sudo fatlabel ${LOOP}p1 AngryUEFI
 
 # mount ESP and create necessary files
 
@@ -67,7 +67,7 @@ insmod all_video
 insmod chain
 insmod configfile
 insmod search
-search --no-floppy --label ESP --set=root
+search --no-floppy --label AngryUEFI --set=root
 chainloader /Shellx64.efi
 boot
 EOF
