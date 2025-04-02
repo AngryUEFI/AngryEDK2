@@ -78,4 +78,7 @@ sudo umount $USB_DIRECTORY
 rm -rf $USB_DIRECTORY
 sudo losetup -d $LOOP
 
+# compress the image
+tar czf ${OUTPUT_IMAGE_USB} ${OUTPUT_IMAGE_USB}.tar.bz2
+
 popd
