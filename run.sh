@@ -19,4 +19,7 @@ qemu-system-x86_64 \
   -netdev user,id=net0,hostfwd=tcp::3239-:3239 \
   -device e1000,netdev=net0 \
   -d guest_errors -serial stdio \
+  -cpu host \
+  -enable-kvm \
+  -smp sockets=1,cores=4,threads=2 \
   $@
