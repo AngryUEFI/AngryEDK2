@@ -14,4 +14,4 @@ source "${EDK2_DIR}"/angry-vars.sh
 
 $DOCKER_COMMAND pull "${DOCKER_IMAGE}"
 # the container is just used to init the local directory, it can be removed afterwards
-$DOCKER_COMMAND run "${DOCKER_ARGS[@]}" --rm "${DOCKER_IMAGE}" "${EDK2_DIR}"/init-docker.sh
+$DOCKER_COMMAND run "${DOCKER_ARGS[@]}" --rm "${DOCKER_IMAGE}" "${DOCKER_BASE_DIR}"/init-docker.sh
