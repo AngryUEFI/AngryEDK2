@@ -13,10 +13,6 @@ DOCKER_ARGS=(-v "${EDK2_DIR}":"${EDK2_DIR}" -i -e EDK2_DOCKER_USER_HOME="${EDK2_
 if [ "$CI_RUN" != "1" ]; then
   DOCKER_ARGS+=( -t )
 fi
-DOCKER_BASE_DIR=${EDK2_DIR}
-if [ "$CI_RUN" == "1" ]; then
-  DOCKER_BASE_DIR=${ANGRYEDK_DOCKER_BASE_PATH}
-fi
 DOCKER_IMAGE=ghcr.io/tianocore/containers/ubuntu-22-dev
 
 OUTPUT_DIR="${EDK2_DIR}"/Build/AngryUEFI
