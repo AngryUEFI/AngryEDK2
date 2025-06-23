@@ -20,46 +20,39 @@ rm -f $OUTPUT_IMAGE_USB
 
 dd if=/dev/zero of=$OUTPUT_IMAGE_USB bs=1M count=100
 
-# create an UEFI partition
+# partition as GPT, one FAT32 EFI partition
 
-parted $OUTPUT_IMAGE_USB --script mklabel gpt
-parted $OUTPUT_IMAGE_USB --script mkpart ESP fat32 1MiB 100%
-parted $OUTPUT_IMAGE_USB --script set 1 boot on
+parted "$OUTPUT_IMAGE_USB" --script mklabel gpt \
+  mkpart ESP fat32 1MiB 100% \
+  set 1 boot on
 
-# loop mount the device
+# figure out where partition #1 starts (in bytes)
+START=$(parted "$OUTPUT_IMAGE_USB" --script unit B print |
+        awk '/^ 1/ {print $2}' | sed 's/B//')
 
-LOOP=$(sudo losetup --show -fP $OUTPUT_IMAGE_USB)
+# paths to binaries
+SHELL_EFI="$EDK2_DIR/Build/OvmfX64/RELEASE_GCC5/X64/Shell.efi"
+ANGRY_UEFI="$EDK2_DIR/Build/AngryUEFI/AngryUEFI.efi"
 
-# format the first partition
+# build a standalone GRUB EFI binary locally
 
-sudo mkfs.vfat -F32 ${LOOP}p1
-sudo fatlabel ${LOOP}p1 AngryUEFI
-
-# mount ESP and create necessary files
-
-mkdir -p $USB_DIRECTORY
-sudo mount -o uid=`id -u` -o gid=`id -g` ${LOOP}p1 $USB_DIRECTORY
-mkdir -p $USB_DIRECTORY/EFI/boot
-mkdir -p $USB_DIRECTORY/boot/grub
-
-# copy UEFI shell & AngryUEFI
-
-cp "${EDK2_DIR}"/Build/OvmfX64/RELEASE_GCC5/X64/Shell.efi $USB_DIRECTORY/Shellx64.efi
-cp "${EDK2_DIR}"/Build/AngryUEFI/AngryUEFI.efi $USB_DIRECTORY/AngryUEFI.efi
+GRUBEFI=$(mktemp)
+grub-mkimage -O x86_64-efi \
+  -o "$GRUBEFI" \
+  -p /boot/grub \
+  all_video chain configfile exfat fat normal search search_label part_gpt
 
 # create autostart file
 
-cat << 'EOF' > $USB_DIRECTORY/startup.nsh
+AUTOSTART=$(mktemp)
+cat > "$AUTOSTART" << 'EOF'
 AngryUEFI.efi
 EOF
 
-# install GRUB
-
-grub-mkimage -O x86_64-efi -o $USB_DIRECTORY/EFI/boot/bootx64.efi -p /boot/grub all_video chain configfile exfat fat normal search search_label part_gpt
-
 # create GRUB config
 
-cat > $USB_DIRECTORY/boot/grub/grub.cfg << 'EOF'
+GRUBCFG=$(mktemp)
+cat > "$GRUBCFG" << 'EOF'
 insmod part_gpt
 insmod fat
 insmod exfat
@@ -72,13 +65,30 @@ chainloader /Shellx64.efi
 boot
 EOF
 
-# unmount & clean up
+# format and populate the FAT partition entirely in userspace
+#    (offset syntax: file@@bytes)
+IMGOFFSET="${OUTPUT_IMAGE_USB}@@${START}"
 
-sudo umount $USB_DIRECTORY
-rm -rf $USB_DIRECTORY
-sudo losetup -d $LOOP
+# label & format FAT32
+mformat -i "$IMGOFFSET" -F -n AngryUEFI ::
+
+# make directories
+for d in EFI EFI/boot boot boot/grub; do
+  mmd -i "$IMGOFFSET" ::/"$d"
+done
+
+# copy EFI binaries & grub
+mcopy -i "$IMGOFFSET" "$SHELL_EFI"      ::/Shellx64.efi
+mcopy -i "$IMGOFFSET" "$ANGRY_UEFI"      ::/AngryUEFI.efi
+mcopy -i "$IMGOFFSET" "$GRUBEFI"        ::/EFI/boot/bootx64.efi
+mcopy -i "$IMGOFFSET" "$GRUBCFG"        ::/boot/grub/grub.cfg
+mcopy -i "$IMGOFFSET" "$AUTOSTART"      ::/startup.nsh
+
+
+# clean up
+rm -f "$GRUBEFI" "$GRUBCFG" "$AUTOSTART"
 
 # compress the image
-tar czf ${OUTPUT_IMAGE_USB} ${OUTPUT_IMAGE_USB}.tar.bz2
+tar czf ${OUTPUT_IMAGE_USB}.tar.bz2 ${OUTPUT_IMAGE_USB}
 
 popd
